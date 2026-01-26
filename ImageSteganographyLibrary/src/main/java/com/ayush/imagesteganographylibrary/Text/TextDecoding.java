@@ -14,7 +14,12 @@ import java.util.List;
 /**
  * In this class all those method in EncodeDecode class are used to decode secret message in image.
  * All the tasks will run in background.
+ *
+ * @deprecated Use {@link TextDecoder#decode(android.graphics.Bitmap, String)} with Kotlin coroutines instead.
+ * This class uses the deprecated AsyncTask API and requires Activity/ProgressDialog dependencies.
+ * The new TextDecoder provides a cleaner coroutine-based API with type-safe DecodeResult handling.
  */
+@Deprecated
 public class TextDecoding extends AsyncTask<ImageSteganography, Void, ImageSteganography> {
 
     //Tag for Log
