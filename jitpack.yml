@@ -1,3 +1,4 @@
-# AGP 8.2.2 needs a JDK 17 toolchain; JitPack still defaults to an older one.
+# The daemon JVM criteria in gradle/gradle-daemon-jvm.properties ask for JDK 21, so hand Gradle
+# one here - otherwise it has to provision a JDK before the build can start.
 jdk:
-  - openjdk17
+  - openjdk21
