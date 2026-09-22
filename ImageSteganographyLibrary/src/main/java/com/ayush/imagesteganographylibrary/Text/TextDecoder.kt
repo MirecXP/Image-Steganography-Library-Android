@@ -1,13 +1,19 @@
 package com.ayush.imagesteganographylibrary.Text
 
 import android.graphics.Bitmap
-import com.ayush.imagesteganographylibrary.Utils.Utility
+import com.ayush.imagesteganographylibrary.core.Crypto
+import com.ayush.imagesteganographylibrary.core.PixelSteganography
+import com.ayush.imagesteganographylibrary.core.SecretKeys
+import com.ayush.imagesteganographylibrary.core.SteganographyCore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
  * Coroutine-based text decoder for extracting hidden messages from images.
  * This is the modern replacement for the deprecated [TextDecoding] AsyncTask.
+ *
+ * The decoding itself lives in [SteganographyCore], which is also what build tooling encodes
+ * with - one implementation on both sides.
  *
  * Usage example:
  * ```kotlin
@@ -27,46 +33,35 @@ object TextDecoder {
      * Decodes a hidden message from an image using the provided secret key.
      *
      * @param image The bitmap image that may contain a hidden message
-     * @param secretKey The secret key used to decrypt the message
+     * @param secretKey The secret key used to decrypt the message, at most 16 characters
      * @return A [DecodeResult] indicating the outcome of the decoding operation
      */
     suspend fun decode(image: Bitmap, secretKey: String): DecodeResult =
         withContext(Dispatchers.Default) {
-            try {
-                val normalizedKey = normalizeKey(secretKey)
-                val chunks = Utility.splitImage(image)
+            val width = image.width
+            val height = image.height
+            val pixels = IntArray(width * height)
+            image.getPixels(pixels, 0, width, 0, 0, width, height)
 
-                val encodedMessage = EncodeDecode.decodeMessage(chunks)
-                if (encodedMessage.isNullOrEmpty()) {
-                    return@withContext DecodeResult.NoMessageFound
-                }
-
-                val decrypted = ImageSteganography.decryptMessage(encodedMessage, normalizedKey)
-                if (decrypted.isNullOrEmpty()) {
-                    return@withContext DecodeResult.WrongSecretKey
-                }
-
-                // Cleanup bitmap chunks to free memory
-                chunks.forEach { it.recycle() }
-
-                DecodeResult.Success(decrypted)
+            val hidden = try {
+                PixelSteganography.decode(pixels, width, height)
             } catch (e: Exception) {
-                DecodeResult.Error(e)
+                return@withContext DecodeResult.Error(e)
+            }
+            if (hidden.isEmpty()) {
+                return@withContext DecodeResult.NoMessageFound
+            }
+
+            try {
+                val decrypted = Crypto.decryptMessage(hidden, SecretKeys.normalize(secretKey))
+                if (decrypted.isEmpty()) {
+                    DecodeResult.WrongSecretKey
+                } else {
+                    DecodeResult.Success(decrypted)
+                }
+            } catch (e: Exception) {
+                // A wrong key fails the padding check rather than returning garbage.
+                DecodeResult.WrongSecretKey
             }
         }
-
-    /**
-     * Normalizes the secret key to 128-bit (16 characters) for AES encryption.
-     * This matches the behavior of [ImageSteganography.convertKeyTo128bit].
-     *
-     * @param key The original secret key
-     * @return A 16-character key (padded with '#' or truncated)
-     */
-    private fun normalizeKey(key: String): String {
-        return if (key.length <= 16) {
-            key.padEnd(16, '#')
-        } else {
-            key.substring(0, 15)
-        }
-    }
 }

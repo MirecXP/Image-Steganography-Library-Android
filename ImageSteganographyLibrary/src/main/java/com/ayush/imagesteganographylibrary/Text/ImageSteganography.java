@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.ayush.imagesteganographylibrary.Utils.Crypto;
 import com.ayush.imagesteganographylibrary.Utils.Utility;
+import com.ayush.imagesteganographylibrary.core.SecretKeys;
 
 /**
  * This main class of the text steganography
@@ -111,20 +112,7 @@ public class ImageSteganography {
     }
 
     private static String convertKeyTo128bit(String secret_key) {
-
-        StringBuilder result = new StringBuilder(secret_key);
-
-        if (secret_key.length() <= 16) {
-            for (int i = 0; i < (16 - secret_key.length()); i++) {
-                result.append("#");
-            }
-        } else {
-            result = new StringBuilder(result.substring(0, 15));
-        }
-
-        Log.d(TAG, "Secret Key Length : " + result.toString().getBytes().length);
-
-        return result.toString();
+        return SecretKeys.normalize(secret_key);
     }
 
     public Bitmap getEncoded_image() {

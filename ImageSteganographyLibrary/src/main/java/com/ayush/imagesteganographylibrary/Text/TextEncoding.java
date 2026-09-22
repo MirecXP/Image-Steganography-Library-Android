@@ -9,7 +9,6 @@ import android.util.Log;
 import com.ayush.imagesteganographylibrary.Text.AsyncTaskCallback.TextEncodingCallback;
 import com.ayush.imagesteganographylibrary.Utils.Utility;
 
-import java.util.List;
 
 /**
  * In this class all those method in EncodeDecode class are used to encode secret message in image.
@@ -84,16 +83,8 @@ public class TextEncoding extends AsyncTask<ImageSteganography, Integer, ImageSt
             //getting image bitmap
             Bitmap bitmap = textStegnography.getImage();
 
-            //getting height and width of original image
-            int originalHeight = bitmap.getHeight();
-            int originalWidth = bitmap.getWidth();
-
-            //splitting bitmap
-            List<Bitmap> src_list = Utility.splitImage(bitmap);
-
             //encoding encrypted compressed message into image
-
-            List<Bitmap> encoded_list = EncodeDecode.encodeMessage(src_list, textStegnography.getEncrypted_message(), new EncodeDecode.ProgressHandler() {
+            Bitmap srcEncoded = EncodeDecode.encodeMessage(bitmap, textStegnography.getEncrypted_message(), new EncodeDecode.ProgressHandler() {
 
                 //Progress Handler
                 @Override
@@ -114,16 +105,6 @@ public class TextEncoding extends AsyncTask<ImageSteganography, Integer, ImageSt
                     progressDialog.setIndeterminate(true);
                 }
             });
-
-            //free Memory
-            for (Bitmap bitm : src_list)
-                bitm.recycle();
-
-            //Java Garbage collector
-            System.gc();
-
-            //merging the split encoded image
-            Bitmap srcEncoded = Utility.mergeImage(encoded_list, originalHeight, originalWidth);
 
             //Setting encoded image to result
             result.setEncoded_image(srcEncoded);
