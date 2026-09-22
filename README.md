@@ -57,9 +57,40 @@ allprojects {
 Now add the following dependency in your app's `build.gradle`
 ```groovy
 dependencies {
-      implementation 'com.github.aagarwal1012:Image-Steganography-Library-Android:v1.0'
+      implementation 'com.github.MirecXP:Image-Steganography-Library-Android:1.3'
 }
 ```
+
+### Encoding without Android
+
+Since `1.3` the codec itself lives in `steganography-core`, a plain JVM module with no Android
+dependency. Build tooling can use it to produce an encoded image that the Android library decodes
+at runtime - useful when the image is generated during a build instead of being committed:
+
+```groovy
+dependencies {
+      implementation 'com.github.MirecXP:steganography-core:1.3'
+}
+```
+
+```kotlin
+val carrier = ImageIO.read(carrierFile)
+val width = carrier.width
+val height = carrier.height
+val pixels = carrier.getRGB(0, 0, width, height, null, 0, width)
+
+val encoded = SteganographyCore.encode(pixels, width, height, "the message", "the password")
+
+val image = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+image.setRGB(0, 0, width, height, encoded, 0, width)
+ImageIO.write(image, "png", outputFile)
+```
+
+The module is Kotlin, and its entry points are `@JvmStatic`, so Java callers use the same
+`SteganographyCore.encode(...)` syntax.
+
+The password is used as an AES-128 key, so keep it at **16 characters or shorter** - longer ones
+are truncated to 15 characters, which AES rejects.
 ## How to encode message into an image ?
 **Note :** Your Activity class should implements `TextEncodingCallback` interface and also contains its `override` methods.
 

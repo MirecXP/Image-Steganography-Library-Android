@@ -1,0 +1,3 @@
+# AGP 8.2.2 needs a JDK 17 toolchain; JitPack still defaults to an older one.
+jdk:
+  - openjdk17

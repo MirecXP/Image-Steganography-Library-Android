@@ -1,0 +1,31 @@
+apply plugin: 'java-library'
+apply plugin: 'org.jetbrains.kotlin.jvm'
+apply plugin: 'maven-publish'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8
+    }
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+}
+
+// Published on its own so that build tooling (Gradle tasks, CLIs) can encode images without
+// pulling in Android. The Android library depends on this module.
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId = 'com.github.MirecXP'
+            artifactId = 'steganography-core'
+            version = project.findProperty('publishVersion') ?: '1.3'
+            afterEvaluate { from components.java }
+        }
+    }
+}

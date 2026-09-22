@@ -9,7 +9,6 @@ import android.util.Log;
 import com.ayush.imagesteganographylibrary.Text.AsyncTaskCallback.TextDecodingCallback;
 import com.ayush.imagesteganographylibrary.Utils.Utility;
 
-import java.util.List;
 
 /**
  * In this class all those method in EncodeDecode class are used to decode secret message in image.
@@ -86,11 +85,8 @@ public class TextDecoding extends AsyncTask<ImageSteganography, Void, ImageStega
 //            if (bitmap == null)
 //                return null;
 
-            //splitting images
-            List<Bitmap> srcEncodedList = Utility.splitImage(bitmap);
-
             //decoding encrypted zipped message
-            String decoded_message = EncodeDecode.decodeMessage(srcEncodedList);
+            String decoded_message = EncodeDecode.decodeMessage(bitmap);
 
             Log.d(TAG, "Decoded_Message : " + decoded_message);
 
@@ -112,14 +108,6 @@ public class TextDecoding extends AsyncTask<ImageSteganography, Void, ImageStega
                 // Set Results
 
                 result.setMessage(decrypted_message);
-
-
-                //free memory
-                for (Bitmap bitm : srcEncodedList)
-                    bitm.recycle();
-
-                //Java Garbage Collector
-                System.gc();
             }
         }
 

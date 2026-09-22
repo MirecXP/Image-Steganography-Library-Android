@@ -1,5 +1,6 @@
 package com.ayush.imagesteganographylibrary
 
+import com.ayush.imagesteganographylibrary.core.SecretKeys
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -7,23 +8,12 @@ import org.junit.Test
  * Tests for key normalization logic used in encryption.
  * The key must be exactly 16 characters for AES-128.
  *
- * This tests the same logic used in ImageSteganography.convertKeyTo128bit()
- * and TextDecoder.normalizeKey()
+ * Exercises [SecretKeys.normalize], which both ImageSteganography.convertKeyTo128bit() and
+ * TextDecoder delegate to.
  */
 class KeyNormalizationTest {
 
-    /**
-     * Normalizes key to 16 characters for AES-128 encryption.
-     * - Keys <= 16 chars: padded with '#' to reach 16 chars
-     * - Keys > 16 chars: truncated to 15 chars (matches original implementation)
-     */
-    private fun normalizeKey(key: String): String {
-        return if (key.length <= 16) {
-            key.padEnd(16, '#')
-        } else {
-            key.substring(0, 15)
-        }
-    }
+    private fun normalizeKey(key: String): String = SecretKeys.normalize(key)
 
     @Test
     fun `empty key is padded to 16 hashes`() {
